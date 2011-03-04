@@ -25,6 +25,11 @@
           (when more
             (list* `assert-args fnname more))))))
 
+(defn- classname [x]
+  (if (nil? x)
+    nil
+    (-> x class .getName)))
+
 (defn- mapknit 
  ([f coll]
    (mapknit f coll nil))
@@ -403,11 +408,18 @@
   (map? selector))
 
 (defn node-selector? [selector]
-  (not (fragment-selector? selector)))
+  (some #(% selector) #{vector? set? symbol?}))
+
+(defn selector? [selector]
+  (or (node-selector? selector) (fragment-selector? selector)))
 
 (defn- static-selector? [selector]
   (or (keyword? selector) 
     (and (coll? selector) (every? static-selector? selector))))
+
+(defn transformation? [trans]
+  (or (nil? trans)
+      (and (ifn? trans) (not (vector? trans)))))
 
 ;; core 
   
@@ -469,6 +481,9 @@
                  transformation)))))
 
 (defn transform [nodes selector transformation]
+  (assert-args transform
+    (selector? selector) (str "selector to be a vector, set, symbol or map, not " (classname selector))
+    (transformation? transformation) (str "transformation to be an IFn or nil, not " (classname transformation)))
   (cond
     (= identity transformation)
       nodes

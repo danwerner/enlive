@@ -15,6 +15,16 @@
 
 ;; EXAMPLES: see net.cgrand.enlive-html.examples
 
+; Copied from clojure.core, but disable-able and more dynamic now
+(defmacro ^:private assert-args [fnname & pairs]
+  (when *assert*
+    `(do (when-not ~(first pairs)
+           (throw (AssertionError.
+                    (str ~(str fnname " requires ") ~(second pairs)))))
+       ~(let [more (nnext pairs)]
+          (when more
+            (list* `assert-args fnname more))))))
+
 (defn- mapknit 
  ([f coll]
    (mapknit f coll nil))

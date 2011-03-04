@@ -509,6 +509,8 @@
     (as-nodes node-or-nodes) rules))
 
 (defmacro at [node-or-nodes & rules]
+  (assert-args at
+    (even? (count rules)) "either one transformation or an even number of forms (that is, selector-transformation pairs) as its arguments")
   `(-> ~node-or-nodes as-nodes 
      ~@(for [[s t] (partition 2 rules)]
          (if (= :lockstep s)

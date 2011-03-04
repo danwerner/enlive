@@ -581,8 +581,14 @@
 ;; main macros
 (defmacro transformation
  ([] `identity)
- ([form] form)
- ([form & forms] `(fn [node#] (at node# ~form ~@forms))))
+ ([form]
+  (assert-args transformation
+    (not (vector? form)) "either one transformation or an even number of forms (that is, selector-transformation pairs) as its arguments, but received a single vector")
+  form)
+ ([form & forms]
+  (assert-args transformation
+    (odd? (count forms)) "either one transformation or an even number of forms (that is, selector-transformation pairs) as its arguments, but received an odd number of forms")
+  `(fn [node#] (at node# ~form ~@forms))))
 
 (defmacro lockstep-transformation
  [& forms] `(fn [node#] (at node# :lockstep ~(apply array-map forms))))
